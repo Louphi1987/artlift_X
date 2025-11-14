@@ -19,7 +19,7 @@ PICTNART_PROMOS = [
 ]
 P_ARTISTS = 0.70
 P_PROMO   = 0.0025
-RANDOM_WAIT = (0.6, 1.4)
+RANDOM_WAIT = (0.6, 1.3)
 
 def human_pause(a=RANDOM_WAIT[0], b=RANDOM_WAIT[1]):
     time.sleep(random.uniform(a, b))
