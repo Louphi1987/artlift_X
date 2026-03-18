@@ -3,7 +3,7 @@
 ArtLift Bluesky — découverte automatique de profils artistiques (sans liste en dur)
 - Matin (07–11 Europe/Brussels): likes légers de la timeline
 - Soir  (19–22 Europe/Brussels): 1 repost image d'un profil artistique + 1 repost de @loufisart.bsky.social
-"""
+""" 
 
 import os, random, sys, time
 from datetime import datetime, time as dtime, timedelta
