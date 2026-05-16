@@ -2,10 +2,10 @@ name: ArtLift Bot (Bluesky)
 
 on:
   schedule:
-    # Matin Bruxelles ~ 07–11 -> UTC 05–09
-    - cron: "7 5,6,7,8,9 * * *"
-    # Soir Bruxelles ~ 19–22 -> UTC 17–20
-    - cron: "12 17,18,19,20 * * *"
+    # Morning Brussels support window.
+    - cron: "17 6,7,8,9 * * *"
+    # Evening Brussels support window.
+    - cron: "41 17,18,19,20 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -19,36 +19,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: List repo files (sanity)
-        run: |
-          pwd
-          ls -la
-          ls -la scripts || true
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      - name: Restore ArtLift state
+        uses: actions/cache/restore@v4
+        with:
+          path: .artlift
+          key: artlift-state-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            artlift-state-${{ github.ref_name }}-
+            artlift-state-
+
       - name: Install deps
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
+
+      - name: Prepare state directory
+        run: mkdir -p .artlift
 
       - name: Anti-burst jitter
-        run: sleep $((RANDOM % 300))
+        run: sleep $((RANDOM % 90))
 
-      # A) si main_bsky.py est à la racine :
       - name: Run ArtLift Bluesky
-        if: ${{ hashFiles('main_bsky.py') != '' }}
         env:
           BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
           BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
-        run: python main_bsky.py
+          ARTLIFT_STATE_PATH: .artlift/state.json
+        run: python main.py
 
-      # B) si ton script est dans scripts/
-      - name: Run ArtLift Bluesky (scripts/)
-        if: ${{ hashFiles('scripts/main_bsky.py') != '' }}
-        working-directory: scripts
-        env:
-          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
-          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
-        run: python main_bsky.py
+      - name: Save ArtLift state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .artlift
+          key: artlift-state-${{ github.ref_name }}-${{ github.run_id }}
